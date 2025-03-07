@@ -6,7 +6,7 @@ import '../providers/caravan_provider.dart';
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<AppAuthProvider>(context);
     final caravanProvider = Provider.of<CaravanProvider>(context);
     final user = authProvider.currentUser;
     final caravan = caravanProvider.activeCaravan;

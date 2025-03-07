@@ -26,34 +26,61 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    bool success;
-    if (_isSignUp) {
-      success = await authProvider.register(
-        _nameController.text.trim(),
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-    } else {
-      success = await authProvider.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+    print('LOGIN SCREEN: Submit button pressed');
+    if (!_formKey.currentState!.validate()) {
+      print('LOGIN SCREEN: Form validation failed');
+      return;
     }
 
-    if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authProvider.error ?? 'An error occurred')),
-      );
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    print('LOGIN SCREEN: Starting login/register process');
+
+    try {
+      bool success;
+      if (_isSignUp) {
+        print('LOGIN SCREEN: Registration flow');
+        success = await authProvider.register(
+          _nameController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+      } else {
+        print('LOGIN SCREEN: Login flow with email=${_emailController.text.trim()}');
+        success = await authProvider.login(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+      }
+
+      print('LOGIN SCREEN: Auth operation result: $success');
+      
+      if (!success && mounted) {
+        print('LOGIN SCREEN: Showing error: ${authProvider.error}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.error ?? 'An error occurred'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      print('LOGIN SCREEN: Exception during login: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Authentication error: $e'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<AppAuthProvider>(context);
 
     return Scaffold(
       body: SafeArea(

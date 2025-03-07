@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:clipboard/clipboard.dart';
 import '../providers/auth_provider.dart';
 import '../providers/caravan_provider.dart';
 import 'profile_screen.dart';
@@ -54,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _updateUserLocation() {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     final currentUser = authProvider.currentUser;
     if (currentUser == null) return;
 
@@ -75,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _createCaravan() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     final caravanProvider = Provider.of<CaravanProvider>(
       context,
       listen: false,
@@ -96,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _joinCaravan() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     final caravanProvider = Provider.of<CaravanProvider>(
       context,
       listen: false,
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     final caravanProvider = Provider.of<CaravanProvider>(
       context,
       listen: false,
@@ -144,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final caravanProvider = Provider.of<CaravanProvider>(context);
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<AppAuthProvider>(context);
     final caravan = caravanProvider.activeCaravan;
 
     return Scaffold(
@@ -310,11 +311,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildActiveCaravanView() {
     final caravanProvider = Provider.of<CaravanProvider>(context);
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<AppAuthProvider>(context);
     final caravan = caravanProvider.activeCaravan;
     final members = caravanProvider.caravanMembers;
     final messages = caravanProvider.messages;
     final currentUserId = authProvider.currentUser?.id;
+    
+    // Get join code for sharing
+    final joinCode = caravan?.joinCode ?? '';
 
     return Column(
       children: [
@@ -338,6 +342,53 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Show join code for sharing
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Card(
+                            elevation: 3,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.group_add, size: 16),
+                                  const SizedBox(width: 8),
+                                  const Text('Join Code:'),
+                                  const SizedBox(width: 8),
+                                  SelectableText(
+                                    joinCode,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: const Icon(Icons.copy, size: 16),
+                                    onPressed: () {
+                                      // Copy to clipboard
+                                      FlutterClipboard.copy(joinCode).then((_) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Join code copied to clipboard'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      });
+                                    },
+                                    tooltip: 'Copy join code',
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
