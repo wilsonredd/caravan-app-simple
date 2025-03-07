@@ -1,0 +1,34 @@
+# Flutter/Dart specific
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Pods/
+
+# Android specific
+android/app/debug.keystore
+android/*.keystore
+android/*.jks
+
+# iOS specific
+ios/Flutter/.last_build_id
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Podfile.lock
+ios/.symlinks/
+
+# macOS specific
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/ephemeral/
+
+# VS Code/IntelliJ related
+.idea/
+.vscode/
+*.iml
+
+# Firebase config files
+google-services.json
+GoogleService-Info.plist
